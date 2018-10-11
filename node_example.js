@@ -1,24 +1,23 @@
-var http = require('http')
+const http = require('http')
+const url = require('url')
 
 var server = http.createServer(function (request, response) {
-  var url = request.url
-  var data = url.split('?')
+  const parsedUrl = url.parse(request.url, true)
 
-  if(data[0] === '/suma') {
+  if(parsedUrl.pathname === '/suma') {
     var suma = 0
-    var input = data[1].split('&')
-    input.forEach(function(numero) {
-      var splitted = numero.split('=')[1]
-      if(isNumeric(splitted)) {
-        //Ok, it's a number
-        var number = Number(splitted)
-        suma += number
-      } else {
-        //It's not a number, so we show an error message and sends to the client
-        response.writeHead(400, {'Content-Type': 'application/json'})
-        response.end(JSON.stringify({result:'error, el input debe ser numerico'}))
-      }
-    })
+    for (var propName in parsedUrl.query) {
+        var splitted = parsedUrl.query[propName]
+        if(isNumeric(splitted)) {
+          //Ok, it's a number
+          var number = Number(splitted)
+          suma += number
+        } else {
+          //It's not a number, so we show an error message and sends to the client
+          response.writeHead(400, {'Content-Type': 'application/json'})
+          response.end(JSON.stringify({result:'error, el input debe ser numerico'}))
+        }
+    }
     //If everithing was OK, we send code 200 response, using json format
     response.writeHead(200, {'Content-Type': 'application/json'})
     response.end(JSON.stringify({result:suma}))
